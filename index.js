@@ -40,7 +40,7 @@ const progressBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_cla
  * e.g. console.log(xxhashAsHex('System', 128)).
  */
 let prefixes = ['0x26aa394eea5630e07c48ae0c9558cef7b99d880ec681799c0cf30e8886371da9' /* System.Account */];
-const skippedModulesPrefix = ['System', 'Session', 'Babe', 'Grandpa', 'GrandpaFinality', 'FinalityTracker', 'Instance2Membership'];
+const skippedModulesPrefix = ['System', 'Session', 'Babe', 'Grandpa', 'GrandpaFinality', 'FinalityTracker'];
 
 async function main() {
   if (!fs.existsSync(binaryPath)) {
@@ -96,7 +96,8 @@ async function main() {
 
   // Generate chain spec for original and forked chains
   execSync(binaryPath + ' build-spec --chain main --raw > ' + originalSpecPath);
-  execSync(binaryPath + ' build-spec --chain dummy --raw > ' + forkedSpecPath);
+  execSync(binaryPath + ' build-spec --chain /Users/eliottteissonniere/Documents/Work/Nodle/chain/node/res/fork.json --raw > ' + forkedSpecPath);
+  //execSync(binaryPath + ' build-spec --chain dev --raw > ' + forkedSpecPath);
 
   let storage = JSON.parse(fs.readFileSync(storagePath, 'utf8'));
   let originalSpec = JSON.parse(fs.readFileSync(originalSpecPath, 'utf8'));
@@ -110,7 +111,9 @@ async function main() {
   // Grab the items to be moved, then iterate through and insert into storage
   storage
     .filter((i) => prefixes.some((prefix) => i[0].startsWith(prefix)))
-    .forEach(([key, value]) => (forkedSpec.genesis.raw.top[key] = value));
+    .forEach(([key, value]) => {
+      forkedSpec.genesis.raw.top[key] = value;
+    });
 
   // Delete System.LastRuntimeUpgrade to ensure that the on_runtime_upgrade event is triggered
   delete forkedSpec.genesis.raw.top['0x26aa394eea5630e07c48ae0c9558cef7f9cce9c888469bb1a0dceaa129672ef8'];
@@ -119,7 +122,7 @@ async function main() {
   forkedSpec.genesis.raw.top['0x3a636f6465'] = '0x' + fs.readFileSync(hexPath, 'utf8').trim();
 
   // To prevent the validator set from changing mid-test, set Staking.ForceEra to ForceNone ('0x02')
-  forkedSpec.genesis.raw.top['0x5f3e4907f716ac89b6347d15ececedcaf7dad0317324aecae8744b87fc95f2f3'] = '0x02';
+  //forkedSpec.genesis.raw.top['0x5f3e4907f716ac89b6347d15ececedcaf7dad0317324aecae8744b87fc95f2f3'] = '0x02';
 
   fs.writeFileSync(forkedSpecPath, JSON.stringify(forkedSpec, null, 4));
 
