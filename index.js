@@ -88,6 +88,7 @@ async function main() {
   const modules = JSON.parse(metadata.asLatest.modules);
   modules.forEach((module) => {
     if (module.storage) {
+      console.log(module.storage.prefix, xxhashAsHex(module.storage.prefix, 128));
       if (!skippedModulesPrefix.includes(module.storage.prefix)) {
         prefixes.push(xxhashAsHex(module.storage.prefix, 128));
       }
